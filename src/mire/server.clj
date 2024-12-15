@@ -12,7 +12,9 @@
      (commands/discard item))
    (commute player/streams dissoc player/*name*)
    (commute (:inhabitants @player/*current-room*)
-            disj player/*name*)))
+            disj player/*name*)
+             (commute rooms/players_inventories dissoc player/*name*)
+   (commute rooms/players_rooms dissoc player/*name*)))
 
 (defn- get-unique-player-name [name]
   (if (@player/streams name)
