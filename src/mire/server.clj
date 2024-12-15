@@ -36,6 +36,8 @@
               player/*inventory* (ref #{})]
       (dosync
        (commute (:inhabitants @player/*current-room*) conj player/*name*)
+       (commute rooms/players_inventories assoc player/*name* player/*inventory*)
+       (commute rooms/players_rooms assoc player/*name* player/*current-room*)
        (commute player/streams assoc player/*name* *out*))
       (doseq [inhabitant (disj @(:inhabitants @player/*current-room*) player/*name*)]
           (binding [*out* (player/streams inhabitant)]
