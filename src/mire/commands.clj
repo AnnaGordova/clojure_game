@@ -111,7 +111,10 @@
     (if-let [room (first (filter #((:items %) (keyword item))
                                  (vals @rooms/rooms)))]
       (str item " is in " (:name room))
-      (str item " is not in any room."))
+      (if-let [inv (first (filter #(some #{(keyword item)} @(second %)) @rooms/players_inventories))]
+       (let [r (first (filter #((:inhabitants %) (first inv)) (vals @rooms/rooms)))]
+        (str item " is in " (:name r)))
+      (str item " is not in any room.")))
     "You need to be carrying the detector for that."))
 
 (defn portal
