@@ -78,7 +78,53 @@
                             (:items @player/*current-room*))
          (str "You dropped the " thing "."))
      (str "You're not carrying a " thing "."))))
-     
+
+
+(defn kick
+ "Try to kick someone out of the room"
+ [person destination]
+ (let [person_name (str/join " " person)
+       direction (first destination)
+       target-name ((:exits @player/*current-room*) (keyword direction)) ;; название комнаты-назначения
+       target (@rooms/rooms target-name)] ;; объект комнаты назначения
+  (if (some #{person_name} (disj @(:inhabitants @player/*current-room*) player/*name*))
+      (if target
+       (if (> (rand 100) 50) 
+        (dosync
+         (if (= "portal" direction) 
+          (alter (:exits @player/*current-room*) dissoc :portal))
+         (move-between-refs person_name
+                            (:inhabitants @player/*current-room*)
+                            (:inhabitants target))
+         (ref-set (rooms/players_rooms person_name) target)
+         (doseq [inhabitant (disj @(:inhabitants @player/*current-room*) player/*name*)]
+          (binding [*out* (player/streams inhabitant)]
+           (println (str person_name " was kicked out through " direction " by " player/*name*))
+           (println player/prompt)))
+         (doseq [inhabitant (disj @(:inhabitants target) person_name)]
+          (binding [*out* (player/streams inhabitant)]
+           (println (str person_name " enters room through " (direction_opposite (keyword direction))))
+           (println player/prompt)))
+         (binding [*out* (player/streams person_name)]
+           (println (str "You were kicked out of room through " (keyword direction) " by " player/*name*))
+           (println player/prompt))
+         (str "Successfully kicked " person_name " to " direction))
+        (dosync 
+         (binding [*out* (player/streams person_name)]
+           (println (str player/*name* " tried to kick you out of room through " direction))
+           (println player/prompt))
+         (doseq [inhabitant (disj @(:inhabitants @player/*current-room*) player/*name* person_name)]
+          (binding [*out* (player/streams inhabitant)]
+           (println (str player/*name* " tried to kick "person_name " out through" direction))
+           (println player/prompt)))
+         (str "You were unsuccessfull")))
+       (str "No such way " direction))
+      (str person_name " is not here"))))
+
+
+
+
+
  (defn give
   "Give something from your inventory to someone else."
   [thing_seq person]
@@ -172,6 +218,13 @@
                "look" look
                "say" say
                "help" help})
+
+(def commands_with_person 
+              {"whisper" whisper,
+               "give" give,
+               "kick" kick})
+
+               
 
 ;; Command handling
 
