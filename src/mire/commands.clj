@@ -136,6 +136,20 @@
         (println player/prompt)))
     (str "You said " message)))
 
+
+(defn whisper
+  "Say something out quiet so only one person in the room can hear."
+  [words person]
+  (let [message (str/join " " words)]
+    (let [person_name (str/join " " person)]
+     (if (some #{person_name} (disj @(:inhabitants @player/*current-room*) player/*name*))
+      (do 
+       (binding [*out* (player/streams person_name)]
+        (println (str player/*name* " whispers: " message))
+        (println player/prompt))
+       (str "You whispered " message " to " person_name))
+      (str person_name " is not here")))))    
+
 (defn help
   "Show available commands and what they do."
   []
