@@ -30,7 +30,6 @@
         (str/join "\n" (map #(str "Person " % " is here.\n") 
                                   (disj @(:inhabitants @player/*current-room*) player/*name*)))))
 
-
 (defn move
   "\"♬ We gotta get out of this place... ♪\" Give a direction."
   [direction]
@@ -52,7 +51,6 @@
           (binding [*out* (player/streams inhabitant)]
            (println (str player/*name* " enters room through " (direction_opposite (keyword direction))))
            (println player/prompt)))
-
          (ref-set player/*current-room* target)
          (look))
        "You can't go that way."))))
@@ -78,7 +76,6 @@
                             (:items @player/*current-room*))
          (str "You dropped the " thing "."))
      (str "You're not carrying a " thing "."))))
-
 
 (defn kick
  "Try to kick someone out of the room"
@@ -121,8 +118,6 @@
        (str "No such way " direction))
       (str person_name " is not here"))))
 
-
-
 (defn give
   "Give something from your inventory to someone else."
   [thing_seq person]
@@ -143,7 +138,6 @@
 
      (str "You're not carrying a " thing ".")))))
 
- 
 (defn inventory
   "See what you've got."
   []
@@ -185,7 +179,6 @@
         (println player/prompt)))
     (str "You said " message)))
 
-
 (defn whisper
   "Say something out quiet so only one person in the room can hear."
   [words person]
@@ -225,9 +218,7 @@
 (def commands_with_person 
               {"whisper" whisper,
                "give" give,
-               "kick" kick})
-
-               
+               "kick" kick})      
 
 ;; Command handling
 
@@ -235,10 +226,10 @@
   "Execute a command that is passed to us."
   [input]
   (try (let [[command & args] (.split input " +")]
-        (if (some #{"to"} args) 
-        (let [[command_args command_person] (split-at (.indexOf args "to") args)]
-          (apply (commands_with_person command) command_args (vector (remove #{"to"} command_person)))) 
-         (apply (commands command) args))
+         (if (some #{"to"} args) 
+          (let [[command_args command_person] (split-at (.indexOf args "to") args)]
+           (apply (commands_with_person command) command_args (vector (remove #{"to"} command_person)))) 
+          (apply (commands command) args)))
        (catch Exception e
          (.printStackTrace e (new java.io.PrintWriter *err*))
          "You can't do that!")))

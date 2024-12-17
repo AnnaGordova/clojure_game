@@ -62,7 +62,7 @@ loop(Stream) :-
 
 main :-
     setup_call_cleanup(
-        tcp_connect(localhost:3333, Stream, []),
+        tcp_connect(localhost:1488, Stream, []),
         (create_name(Stream), loop(Stream)),
         close(Stream)).
      
