@@ -204,7 +204,7 @@
   []
   (str/join "\n" (map #(str (key %) ": " (:doc (meta (val %))))
                       (dissoc (ns-publics 'mire.commands)
-                              'execute 'commands))))
+                              'execute 'commands 'commands_with_person 'direction_opposite))))
 
 ;; Command data
 
@@ -235,6 +235,9 @@
   "Execute a command that is passed to us."
   [input]
   (try (let [[command & args] (.split input " +")]
+        (if (some #{"to"} args) 
+        (let [[command_args command_person] (split-at (.indexOf args "to") args)]
+          (apply (commands_with_person command) command_args (vector (remove #{"to"} command_person)))) 
          (apply (commands command) args))
        (catch Exception e
          (.printStackTrace e (new java.io.PrintWriter *err*))
